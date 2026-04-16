@@ -1,0 +1,155 @@
+[
+  {
+    "statementId": "bods-entity-001",
+    "statementType": "entityStatement",
+    "entityType": "registeredEntity",
+    "names": [
+      {"type": "legal", "fullName": "Acme Corporation Ltd"}
+    ],
+    "identifiers": [
+      {"id": "GB12345678", "scheme": "GB-COH", "schemeName": "UK Companies House"}
+    ],
+    "incorporatedInJurisdiction": {"code": "GB", "name": "United Kingdom"},
+    "foundingDate": "2005-03-15",
+    "addresses": [
+      {"type": "registered", "address": "123 High Street, London", "postCode": "EC1A 1BB", "country": {"code": "GB", "name": "United Kingdom"}}
+    ],
+    "isComponent": false,
+    "publicationDetails": {
+      "publicationDate": "2024-01-10",
+      "bodsVersion": "0.4",
+      "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "publisher": {"name": "Test Publisher", "uri": "https://example.com"}
+    },
+    "source": {
+      "type": ["primaryResearch"],
+      "description": "UK Companies House",
+      "url": "https://find-and-update.company-information.service.gov.uk/",
+      "retrievedAt": "2024-01-10T00:00:00Z"
+    }
+  },
+  {
+    "statementId": "bods-person-001",
+    "statementType": "personStatement",
+    "names": [
+      {"type": "individual", "fullName": "Jane Smith", "givenName": "Jane", "familyName": "Smith"}
+    ],
+    "identifiers": [],
+    "nationalities": [
+      {"code": "GB", "name": "British"}
+    ],
+    "birthDate": "1975-06-20",
+    "hasPepStatus": false,
+    "addresses": [
+      {"type": "residence", "address": "456 Elm Road, Manchester", "country": {"code": "GB", "name": "United Kingdom"}}
+    ],
+    "publicationDetails": {
+      "publicationDate": "2024-01-10",
+      "bodsVersion": "0.4",
+      "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "publisher": {"name": "Test Publisher", "uri": "https://example.com"}
+    },
+    "source": {
+      "type": ["primaryResearch"],
+      "description": "UK Companies House PSC register",
+      "retrievedAt": "2024-01-10T00:00:00Z"
+    }
+  },
+  {
+    "statementId": "bods-ooc-001",
+    "statementType": "ownershipOrControlStatement",
+    "subject": {
+      "describedByEntityStatement": "bods-entity-001"
+    },
+    "interestedParty": {
+      "describedByPersonStatement": "bods-person-001"
+    },
+    "interests": [
+      {
+        "type": "shareholding",
+        "directOrIndirect": "direct",
+        "beneficialOwnershipOrControl": true,
+        "share": {
+          "exact": 75.0
+        },
+        "startDate": "2010-01-01"
+      }
+    ],
+    "isComponent": false,
+    "publicationDetails": {
+      "publicationDate": "2024-01-10",
+      "bodsVersion": "0.4",
+      "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "publisher": {"name": "Test Publisher", "uri": "https://example.com"}
+    },
+    "source": {
+      "type": ["primaryResearch"],
+      "description": "UK Companies House PSC register",
+      "retrievedAt": "2024-01-10T00:00:00Z"
+    }
+  },
+  {
+    "statementId": "bods-entity-002",
+    "statementType": "entityStatement",
+    "entityType": "registeredEntity",
+    "names": [
+      {"type": "legal", "fullName": "Beta Holdings GmbH"},
+      {"type": "trading", "fullName": "Beta Holdings"}
+    ],
+    "identifiers": [
+      {"id": "HRB12345", "scheme": "DE-HRB", "schemeName": "German Commercial Register"},
+      {"id": "5493001RKX3Y1OA8QT26", "scheme": "XI-LEI", "schemeName": "Global Legal Entity Identifier Index"}
+    ],
+    "incorporatedInJurisdiction": {"code": "DE", "name": "Germany"},
+    "foundingDate": "2000-07-01",
+    "addresses": [
+      {"type": "registered", "address": "Hauptstraße 10, 10115 Berlin", "postCode": "10115", "country": {"code": "DE", "name": "Germany"}}
+    ],
+    "isComponent": false,
+    "publicationDetails": {
+      "publicationDate": "2024-01-10",
+      "bodsVersion": "0.4",
+      "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "publisher": {"name": "Test Publisher", "uri": "https://example.com"}
+    },
+    "source": {
+      "type": ["primaryResearch"],
+      "description": "German Commercial Register",
+      "retrievedAt": "2024-01-10T00:00:00Z"
+    }
+  },
+  {
+    "statementId": "bods-ooc-002",
+    "statementType": "ownershipOrControlStatement",
+    "subject": {
+      "describedByEntityStatement": "bods-entity-001"
+    },
+    "interestedParty": {
+      "describedByEntityStatement": "bods-entity-002"
+    },
+    "interests": [
+      {
+        "type": "shareholding",
+        "directOrIndirect": "direct",
+        "beneficialOwnershipOrControl": false,
+        "share": {
+          "minimum": 25.0,
+          "maximum": 50.0
+        },
+        "startDate": "2015-06-01"
+      }
+    ],
+    "isComponent": false,
+    "publicationDetails": {
+      "publicationDate": "2024-01-10",
+      "bodsVersion": "0.4",
+      "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "publisher": {"name": "Test Publisher", "uri": "https://example.com"}
+    },
+    "source": {
+      "type": ["primaryResearch"],
+      "description": "German Commercial Register",
+      "retrievedAt": "2024-01-10T00:00:00Z"
+    }
+  }
+]

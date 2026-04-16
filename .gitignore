@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+pip-wheel-metadata/
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Lance / output datasets
+output/
+*.lance/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
