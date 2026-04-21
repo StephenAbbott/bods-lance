@@ -1,26 +1,28 @@
-"""Tests for entity statement transformation."""
+"""Tests for entity statement transformation (BODS v0.4)."""
 
 from bods_lance.transform.entities import transform_entity
 
 
 def test_basic_fields(entity_stmt):
     row = transform_entity(entity_stmt)
-    assert row["statement_id"] == "bods-entity-001"
-    assert row["statement_type"] == "entityStatement"
+    assert row["record_id"] == "rec-acme-holdings-ltd"
+    assert row["record_type"] == "entity"
     assert row["entity_type"] == "registeredEntity"
 
 
-def test_primary_name_picks_legal(entity_stmt):
+def test_primary_name_from_single_name_string(entity_stmt):
+    """v0.4 entity name is a single string under recordDetails.name."""
     row = transform_entity(entity_stmt)
     assert row["primary_name"] == "Acme Corporation Ltd"
 
 
-def test_primary_name_prefers_legal_over_trading(entity_stmt_multi_name):
+def test_primary_name_beta(entity_stmt_multi_name):
     row = transform_entity(entity_stmt_multi_name)
     assert row["primary_name"] == "Beta Holdings GmbH"
 
 
-def test_names_list(entity_stmt):
+def test_names_list_synthesised_from_string(entity_stmt):
+    """Single name string is wrapped into a one-element names list."""
     row = transform_entity(entity_stmt)
     assert len(row["names"]) == 1
     assert row["names"][0]["full_name"] == "Acme Corporation Ltd"
@@ -43,6 +45,7 @@ def test_multiple_identifiers(entity_stmt_multi_name):
 
 
 def test_jurisdiction(entity_stmt):
+    """v0.4: incorporatedInJurisdiction → recordDetails.jurisdiction."""
     row = transform_entity(entity_stmt)
     assert row["jurisdiction_code"] == "GB"
     assert row["jurisdiction_name"] == "United Kingdom"
@@ -76,3 +79,13 @@ def test_is_component_defaults_false(entity_stmt):
 def test_founding_date(entity_stmt):
     row = transform_entity(entity_stmt)
     assert row["founding_date"] == "2005-03-15"
+
+
+def test_statement_id_preserved(entity_stmt):
+    row = transform_entity(entity_stmt)
+    assert row["statement_id"] == "t-e1-acme-holdings-001"
+
+
+def test_record_status(entity_stmt):
+    row = transform_entity(entity_stmt)
+    assert row["record_status"] == "new"

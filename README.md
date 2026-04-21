@@ -17,13 +17,13 @@ output/
 
 Each dataset uses a typed [PyArrow](https://arrow.apache.org/docs/python/) schema. Complex nested fields (names, identifiers, interests, addresses) are preserved as Arrow struct/list columns. High-value fields are promoted to top-level columns for easy filtering:
 
-| Promoted column | Source BODS field |
+| Promoted column | Source BODS v0.4 field |
 |---|---|
-| `primary_name` | First `legal` or `trading` entry in `names[]` |
-| `jurisdiction_code` | `incorporatedInJurisdiction.code` |
-| `registered_address` | First `registered` entry in `addresses[]` |
-| `has_beneficial_ownership_interest` | Any `interests[].beneficialOwnershipOrControl == true` |
-| `max_share_exact` | Highest `interests[].share.exact` across all interests |
+| `primary_name` | `recordDetails.name` (entity) or first `legal` entry in `recordDetails.names[]` (person) |
+| `jurisdiction_code` | `recordDetails.jurisdiction.code` |
+| `registered_address` | First `registered` entry in `recordDetails.addresses[]` |
+| `has_beneficial_ownership_interest` | Any `recordDetails.interests[].beneficialOwnershipOrControl == true` |
+| `max_share_exact` | Highest `recordDetails.interests[].share.exact` across all interests |
 
 ## Installation
 
@@ -166,8 +166,22 @@ pip install -e ".[dev]"
 pytest
 ```
 
+## Testing
+
+```bash
+pytest
+```
+
+### Conformance against the shared BODS v0.4 fixture pack
+
+`tests/test_bods_fixtures_conformance.py` runs the BODS-to-Lance mapper against every case in the canonical [**bods-v04-fixtures**](https://pypi.org/project/bods-v04-fixtures/) pack via the [**pytest-bods-v04-fixtures**](https://pypi.org/project/pytest-bods-v04-fixtures/) plugin. Tests are parametrized by fixture name so a failure like `[edge-cases/10-circular-ownership]` points straight at the offending case.
+
+Lance-specific conformance checks include: every statement maps without exception; circular ownership emits two distinct relationship rows (neither leg is deduplicated away); and declared-unknown UBOs (inline `unspecifiedReason`) survive to `interested_party_unspecified_reason` rather than being silently dropped.
+
 ## Related projects
 
+- [bods-v04-fixtures](https://pypi.org/project/bods-v04-fixtures/) — canonical BODS v0.4 conformance fixture pack ([source](https://github.com/StephenAbbott/bods-fixtures))
+- [pytest-bods-v04-fixtures](https://pypi.org/project/pytest-bods-v04-fixtures/) — pytest plugin for parametrizing tests over the fixture pack ([source](https://github.com/StephenAbbott/pytest-bods-fixtures))
 - [BODS specification](https://standard.openownership.org/en/0.4.0/) — Beneficial Ownership Data Standard
 - [bodsdata](https://github.com/openownership/bodsdata) — BODS to CSV, SQLite, Parquet
 - [lib-cove-bods](https://github.com/openownership/lib-cove-bods) — BODS validation

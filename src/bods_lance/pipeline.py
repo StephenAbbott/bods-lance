@@ -22,15 +22,16 @@ from bods_lance.transform.relationships import transform_relationship
 
 logger = logging.getLogger(__name__)
 
+# BODS v0.4 uses ``recordType`` with values ``entity`` | ``person`` | ``relationship``
 TRANSFORMERS = {
-    "entityStatement": transform_entity,
-    "personStatement": transform_person,
-    "ownershipOrControlStatement": transform_relationship,
+    "entity": transform_entity,
+    "person": transform_person,
+    "relationship": transform_relationship,
 }
 
 
 class BODSLancePipeline:
-    """End-to-end pipeline: BODS JSON/JSONL → Lance datasets."""
+    """End-to-end pipeline: BODS v0.4 JSON/JSONL → Lance datasets."""
 
     def __init__(
         self,
@@ -59,32 +60,32 @@ class BODSLancePipeline:
         writer = LanceWriter(self._output_dir, mode=self._mode)
 
         counts: dict[str, int] = {
-            "entityStatement": 0,
-            "personStatement": 0,
-            "ownershipOrControlStatement": 0,
+            "entity": 0,
+            "person": 0,
+            "relationship": 0,
             "unknown": 0,
         }
 
         for stmt in reader.read(self._input_path):
-            stmt_type = stmt.get("statementType")
-            transformer = TRANSFORMERS.get(stmt_type)
+            record_type = stmt.get("recordType")
+            transformer = TRANSFORMERS.get(record_type)
             if transformer is None:
-                logger.warning("Unknown statementType %r — skipping", stmt_type)
+                logger.warning("Unknown recordType %r — skipping", record_type)
                 counts["unknown"] += 1
                 continue
 
             row = transformer(stmt)
-            writer.add_row(stmt_type, row)
-            counts[stmt_type] += 1
+            writer.add_row(record_type, row)
+            counts[record_type] += 1
 
         table_counts = writer.finalise()
 
         logger.info("Pipeline complete.")
         logger.info(
-            "  Statements processed: entity=%d, person=%d, ooc=%d, unknown=%d",
-            counts["entityStatement"],
-            counts["personStatement"],
-            counts["ownershipOrControlStatement"],
+            "  Records processed: entity=%d, person=%d, relationship=%d, unknown=%d",
+            counts["entity"],
+            counts["person"],
+            counts["relationship"],
             counts["unknown"],
         )
         for table, n in table_counts.items():

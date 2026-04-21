@@ -1,10 +1,8 @@
-"""Tests for the BODS reader."""
+"""Tests for the BODS reader (format-agnostic; tests JSON and JSONL parsing)."""
 
 from __future__ import annotations
 
 import json
-import tempfile
-from pathlib import Path
 
 import pytest
 
@@ -50,12 +48,13 @@ def test_read_jsonl_yields_dicts(sample_jsonl_file):
         assert isinstance(stmt, dict)
 
 
-def test_statement_types_present(sample_json_file):
+def test_record_types_present(sample_json_file):
+    """v0.4 uses recordType with values entity/person/relationship."""
     reader = BODSReader()
-    types = {s["statementType"] for s in reader.read(sample_json_file)}
-    assert "entityStatement" in types
-    assert "personStatement" in types
-    assert "ownershipOrControlStatement" in types
+    types = {s["recordType"] for s in reader.read(sample_json_file)}
+    assert "entity" in types
+    assert "person" in types
+    assert "relationship" in types
 
 
 def test_file_not_found_raises():
@@ -74,7 +73,7 @@ def test_invalid_json_raises(tmp_path):
 
 def test_non_array_json_raises(tmp_path):
     p = tmp_path / "obj.json"
-    p.write_text('{"statementType": "entityStatement"}')
+    p.write_text('{"recordType": "entity"}')
     reader = BODSReader()
     with pytest.raises(ValueError, match="flat array"):
         list(reader.read(p))

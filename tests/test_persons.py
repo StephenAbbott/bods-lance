@@ -1,12 +1,13 @@
-"""Tests for person statement transformation."""
+"""Tests for person statement transformation (BODS v0.4)."""
 
 from bods_lance.transform.persons import transform_person
 
 
 def test_basic_fields(person_stmt):
     row = transform_person(person_stmt)
-    assert row["statement_id"] == "bods-person-001"
-    assert row["statement_type"] == "personStatement"
+    assert row["record_id"] == "rec-jane-smith-1975"
+    assert row["record_type"] == "person"
+    assert row["person_type"] == "knownPerson"
 
 
 def test_primary_name(person_stmt):
@@ -34,10 +35,11 @@ def test_birth_date(person_stmt):
     assert row["birth_date"] == "1975-06-20"
 
 
-def test_pep_status_false(person_stmt):
+def test_pep_status_false_when_no_political_exposure(person_stmt):
+    """has_pep_status is derived from politicalExposure array being non-empty."""
     row = transform_person(person_stmt)
     assert row["has_pep_status"] is False
-    assert row["pep_status"] == []
+    assert row["political_exposure"] == []
 
 
 def test_addresses(person_stmt):
@@ -55,3 +57,13 @@ def test_publication_details(person_stmt):
 def test_empty_identifiers(person_stmt):
     row = transform_person(person_stmt)
     assert row["identifiers"] == []
+
+
+def test_statement_id_preserved(person_stmt):
+    row = transform_person(person_stmt)
+    assert row["statement_id"] == "t-p1-jane-smith-001"
+
+
+def test_record_status(person_stmt):
+    row = transform_person(person_stmt)
+    assert row["record_status"] == "new"

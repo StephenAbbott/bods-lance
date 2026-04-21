@@ -18,41 +18,44 @@ def sample_statements() -> list[dict]:
 
 @pytest.fixture()
 def entity_stmt(sample_statements) -> dict:
-    return next(s for s in sample_statements if s["statementType"] == "entityStatement")
+    return next(s for s in sample_statements if s["recordType"] == "entity")
 
 
 @pytest.fixture()
 def entity_stmt_multi_name(sample_statements) -> dict:
-    """Entity statement with multiple names."""
+    """Entity statement with multiple identifiers (Beta Holdings GmbH)."""
     return next(
         s
         for s in sample_statements
-        if s["statementType"] == "entityStatement" and len(s.get("names", [])) > 1
+        if s["recordType"] == "entity"
+        and len(s.get("recordDetails", {}).get("identifiers", [])) > 1
     )
 
 
 @pytest.fixture()
 def person_stmt(sample_statements) -> dict:
-    return next(s for s in sample_statements if s["statementType"] == "personStatement")
+    return next(s for s in sample_statements if s["recordType"] == "person")
 
 
 @pytest.fixture()
 def ooc_stmt_person(sample_statements) -> dict:
-    """OOC statement linking a person to an entity."""
+    """OOC statement whose interestedParty is a person recordId string."""
     return next(
         s
         for s in sample_statements
-        if s["statementType"] == "ownershipOrControlStatement"
-        and "describedByPersonStatement" in s["interestedParty"]
+        if s["recordType"] == "relationship"
+        and isinstance(s["recordDetails"]["interestedParty"], str)
+        and s["recordDetails"]["interestedParty"].startswith("rec-jane")
     )
 
 
 @pytest.fixture()
 def ooc_stmt_entity(sample_statements) -> dict:
-    """OOC statement linking two entities."""
+    """OOC statement whose interestedParty is an entity recordId string."""
     return next(
         s
         for s in sample_statements
-        if s["statementType"] == "ownershipOrControlStatement"
-        and "describedByEntityStatement" in s["interestedParty"]
+        if s["recordType"] == "relationship"
+        and isinstance(s["recordDetails"]["interestedParty"], str)
+        and s["recordDetails"]["interestedParty"].startswith("rec-beta")
     )

@@ -1,7 +1,7 @@
 """
 Lance/PyArrow schema definitions for BODS v0.4 statement types.
 
-Three tables are produced — one per statement type:
+Three tables are produced — one per record type:
   - entity_statements
   - person_statements
   - ownership_or_control_statements
@@ -10,6 +10,17 @@ Complex nested BODS fields are preserved as Lance struct/list columns where
 relationships between sub-fields matter (e.g. interests[].share), and
 promoted to top-level columns where they are the most useful query targets
 (e.g. jurisdiction_code, primary_name).
+
+BODS v0.4 field mapping notes
+------------------------------
+- ``record_type``   replaces v0.3 ``statementType``
+                    (values: ``entity`` | ``person`` | ``relationship``)
+- ``record_id``     the stable, deduplicated record identifier (new in v0.4)
+- ``record_status`` ``new`` | ``updated`` | ``corrected`` | ``historical``
+- Entity payload is nested under ``recordDetails``; the top-level name is
+  now a single string (``recordDetails.name``) rather than a ``names[]`` array.
+- Relationship ``subject`` and ``interestedParty`` are now plain ``recordId``
+  strings (or an inline unspecified object), not typed reference objects.
 """
 
 import pyarrow as pa
@@ -60,8 +71,13 @@ ANNOTATION_STRUCT = pa.struct(
 
 # Shared publication / source columns (added to every table)
 COMMON_FIELDS = [
+    # BODS v0.4 record envelope
     pa.field("statement_id", pa.string(), nullable=False),
-    pa.field("statement_type", pa.string(), nullable=False),
+    pa.field("record_id", pa.string()),          # stable record identifier (v0.4)
+    pa.field("record_type", pa.string(), nullable=False),  # entity | person | relationship
+    pa.field("record_status", pa.string()),      # new | updated | corrected | historical
+    pa.field("declaration_subject", pa.string()),
+    pa.field("statement_date", pa.string()),
     # publicationDetails
     pa.field("publication_date", pa.string()),
     pa.field("bods_version", pa.string()),
@@ -86,14 +102,16 @@ COMMON_FIELDS = [
 ENTITY_SCHEMA = pa.schema(
     COMMON_FIELDS
     + [
-        pa.field("entity_type", pa.string()),
+        pa.field("entity_type", pa.string()),       # registeredEntity, legalEntity, arrangement, …
         pa.field("entity_sub_type", pa.string()),
         pa.field("is_component", pa.bool_()),
-        # Promoted from names[] for convenience
+        # Promoted from recordDetails.name for convenience
         pa.field("primary_name", pa.string()),
+        # names kept as list for uniformity with person; synthesised from the
+        # single v0.4 recordDetails.name string
         pa.field("names", pa.list_(NAME_STRUCT)),
         pa.field("identifiers", pa.list_(IDENTIFIER_STRUCT)),
-        # Promoted from incorporatedInJurisdiction
+        # Promoted from recordDetails.jurisdiction
         pa.field("jurisdiction_code", pa.string()),
         pa.field("jurisdiction_name", pa.string()),
         pa.field("addresses", pa.list_(ADDRESS_STRUCT)),
@@ -122,6 +140,7 @@ PEP_STATUS_STRUCT = pa.struct(
 PERSON_SCHEMA = pa.schema(
     COMMON_FIELDS
     + [
+        pa.field("person_type", pa.string()),       # knownPerson, anonymousPerson, unknownPerson
         # Promoted from names[] for convenience
         pa.field("primary_name", pa.string()),
         pa.field("names", pa.list_(NAME_STRUCT)),
@@ -136,9 +155,9 @@ PERSON_SCHEMA = pa.schema(
         pa.field("place_of_birth_country_code", pa.string()),
         pa.field("place_of_birth_address", pa.string()),
         pa.field("addresses", pa.list_(ADDRESS_STRUCT)),
+        # has_pep_status derived: True when political_exposure is non-empty
         pa.field("has_pep_status", pa.bool_()),
-        pa.field("pep_status", pa.list_(PEP_STATUS_STRUCT)),
-        pa.field("political_exposure_details", pa.list_(PEP_STATUS_STRUCT)),
+        pa.field("political_exposure", pa.list_(PEP_STATUS_STRUCT)),
     ]
 )
 
@@ -166,11 +185,10 @@ INTEREST_STRUCT = pa.struct(
 OOC_SCHEMA = pa.schema(
     COMMON_FIELDS
     + [
-        # subject is always an entity statement
-        pa.field("subject_entity_statement_id", pa.string()),
-        # interestedParty — one of these will be populated
-        pa.field("interested_party_entity_statement_id", pa.string()),
-        pa.field("interested_party_person_statement_id", pa.string()),
+        # In v0.4 subject and interestedParty are plain recordId strings
+        pa.field("subject_record_id", pa.string()),
+        pa.field("interested_party_record_id", pa.string()),
+        # populated when interestedParty is the inline unspecified object
         pa.field("interested_party_unspecified_reason", pa.string()),
         pa.field("interested_party_unspecified_description", pa.string()),
         # interests
@@ -186,7 +204,7 @@ OOC_SCHEMA = pa.schema(
 )
 
 SCHEMAS = {
-    "entityStatement": ENTITY_SCHEMA,
-    "personStatement": PERSON_SCHEMA,
-    "ownershipOrControlStatement": OOC_SCHEMA,
+    "entity": ENTITY_SCHEMA,
+    "person": PERSON_SCHEMA,
+    "relationship": OOC_SCHEMA,
 }

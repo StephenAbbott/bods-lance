@@ -1,5 +1,11 @@
 """
 Shared transform helpers that build the columns common to all three Lance tables.
+
+BODS v0.4 record envelope
+--------------------------
+Every statement now has a top-level ``recordType`` (``entity`` | ``person`` |
+``relationship``), a stable ``recordId``, and a ``recordStatus``.  The
+statement-specific payload lives under ``recordDetails``.
 """
 
 from __future__ import annotations
@@ -13,14 +19,19 @@ from typing import Any
 
 
 def build_common_row(stmt: dict) -> dict:
-    """Extract fields that appear in every Lance table from a BODS statement."""
+    """Extract fields that appear in every Lance table from a BODS v0.4 statement."""
     pub = stmt.get("publicationDetails") or {}
     publisher = pub.get("publisher") or {}
     source = stmt.get("source") or {}
 
     return {
+        # v0.4 record envelope
         "statement_id": stmt.get("statementId"),
-        "statement_type": stmt.get("statementType"),
+        "record_id": stmt.get("recordId"),
+        "record_type": stmt.get("recordType"),
+        "record_status": stmt.get("recordStatus"),
+        "declaration_subject": stmt.get("declarationSubject"),
+        "statement_date": stmt.get("statementDate"),
         # publicationDetails
         "publication_date": pub.get("publicationDate"),
         "bods_version": pub.get("bodsVersion"),
@@ -67,6 +78,21 @@ def build_names(names: list[dict] | None) -> list[dict]:
             "patronymic_name": n.get("patronymicName"),
         }
         for n in names
+    ]
+
+
+def build_name_from_string(name: str | None) -> list[dict]:
+    """Wrap a v0.4 entity ``recordDetails.name`` string into a one-element names list."""
+    if not name:
+        return []
+    return [
+        {
+            "full_name": name,
+            "name_type": "legal",
+            "family_name": None,
+            "given_name": None,
+            "patronymic_name": None,
+        }
     ]
 
 
