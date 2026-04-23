@@ -2,6 +2,8 @@
 
 Convert beneficial ownership data published in line with version 0.4 of the [Beneficial Ownership Data Standard (BODS)](https://standard.openownership.org/en/0.4.0/) into the [Lance](https://lance.org) columnar storage format.
 
+Part of the [BODS Interoperability Toolkit](https://github.com/StephenAbbott/bods-interoperability-toolkit).
+
 Lance is an open-source, Arrow-native format designed for analytical and AI/ML workloads, with built-in support for vector search, versioning, and cloud storage. Converting BODS data to Lance enables fast columnar analytics over ownership structures — filtering by jurisdiction, querying share percentages, identifying PEP-linked chains — without loading entire datasets into memory.
 
 ## Output
